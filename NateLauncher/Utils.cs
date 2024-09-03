@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,8 +9,6 @@ namespace NateLauncher
 {
     public static class Utils
     {
-        private static readonly string LogFilePath = @"C:\Program Files (x86)\Nate Launcher\Utils.log";
-
         public static string ReadFileWithAdminCheck(string path)
         {
             try
@@ -22,22 +19,10 @@ namespace NateLauncher
             {
                 if (MessageBox.Show("Nate Launcher requires elevated permission to read this file. Would you like to continue?", "Permission Required", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-                    LaunchElevatedLauncher("ReadFile", path);
+                    LaunchElevatedLauncher("InstallProgram", "missionchief", path);
                 }
                 return null;
             }
-        }
-
-        public static void SavePathToJson(string path)
-        {
-            var config = new { Missionchief = path };
-            string json = JsonConvert.SerializeObject(config, Formatting.Indented);
-            LaunchElevatedLauncher("InstallProgram", "missionchief", path, json);
-        }
-
-        public static void LaunchElevatedInstaller()
-        {
-            LaunchElevatedLauncher("InstallProgram");
         }
 
         public static async Task CheckAndRunInstaller(string installPath, string program)
@@ -45,7 +30,7 @@ namespace NateLauncher
             if (ReadFileWithAdminCheck(installPath) == null)
             {
                 MessageBox.Show("Install Location Requires Elevated Permission", "Permission Required", MessageBoxButton.OK, MessageBoxImage.Warning);
-                LaunchElevatedInstaller();
+                LaunchElevatedLauncher("InstallProgram", "missionchief", installPath);
                 return;
             }
 
@@ -59,20 +44,20 @@ namespace NateLauncher
                 string tempFilePath = Path.Combine(installPath, "temp.txt");
                 File.WriteAllText(tempFilePath, "test");
                 File.Delete(tempFilePath);
-                Log("Administrator check passed.");
-                Log("Running non-elevated installer.");
+                Debug.WriteLine("Administrator check passed.");
+                Debug.WriteLine("Running non-elevated installer.");
                 await Installer.InstallProgram(program, installPath);
-                Log("Non-elevated installer finished.");
+                Debug.WriteLine("Non-elevated installer finished.");
             }
             catch (UnauthorizedAccessException)
             {
-                Log("Administrator check failed. Launching elevated installer.");
-                LaunchElevatedInstaller();
+                Debug.WriteLine("Administrator check failed. Launching elevated installer.");
+                LaunchElevatedLauncher("InstallProgram", "missionchief", installPath);
             }
             catch (Exception ex)
             {
-                Log($"Error: {ex.Message}. Launching elevated installer.");
-                LaunchElevatedInstaller();
+                Debug.WriteLine($"Error: {ex.Message}. Launching elevated installer.");
+                LaunchElevatedLauncher("InstallProgram", "missionchief", installPath);
             }
         }
 
@@ -91,24 +76,12 @@ namespace NateLauncher
             try
             {
                 Process.Start(processInfo);
-                Log($"Successfully launched elevated installer with action: {action} and arguments: {escapedArgs}");
+                Debug.WriteLine($"Successfully launched elevated installer with action: {action} and arguments: {escapedArgs}");
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"An error occurred while trying to launch the elevated installer: {ex.Message}");
-                Log($"Error launching elevated installer: {ex.Message}");
-            }
-        }
-
-        private static void Log(string message)
-        {
-            try
-            {
-                File.AppendAllText(LogFilePath, $"{DateTime.Now}: {message}\n");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Logging failed: {ex.Message}");
+                Debug.WriteLine($"Error launching elevated installer: {ex.Message}");
             }
         }
     }
