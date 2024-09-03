@@ -1,0 +1,50 @@
+﻿<Window x:Class="NateLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NateLauncher"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
+        mc:Ignorable="d"
+        Title="Nate Launcher" Height="450" Width="800"
+        ResizeMode="NoResize"
+        StateChanged="Window_StateChanged">
+    <Grid x:Name="MainGrid">
+        <Grid x:Name="AppListView">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="Applications" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center"/>
+                <WrapPanel>
+                    <Button Click="MissionchiefButton_Click" Margin="10" MouseEnter="MissionchiefButton_MouseEnter" MouseLeave="MissionchiefButton_MouseLeave">
+                        <StackPanel>
+                            <Image x:Name="MissionchiefImage" gif:ImageBehavior.AnimatedSource="pack://application:,,,/Resources/missionchief.png" Width="100" Height="100"/>
+                            <TextBlock Text="Missionchief Bot" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="10">
+                        <StackPanel>
+                            <Image Source="./Resources/sample1.png" Width="100" Height="100"/>
+                            <TextBlock Text="Sample App 1" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="10">
+                        <StackPanel>
+                            <Image Source="./Resources/sample2.png" Width="100" Height="100"/>
+                            <TextBlock Text="Sample App 2" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="10">
+                        <StackPanel>
+                            <Image Source="./Resources/sample3.png" Width="100" Height="100"/>
+                            <TextBlock Text="Sample App 3" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="MissionchiefView" Visibility="Collapsed">
+            <Button x:Name="BackButton" Content="Back" Click="BackButton_Click" Width="75" Height="30" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
+            <Button x:Name="InstallButton" Content="Install" Click="InstallButton_Click" Width="100" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+    </Grid>
+</Window>

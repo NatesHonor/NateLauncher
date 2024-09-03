@@ -1,0 +1,17 @@
+D:\Development\Applications\MissionchiefBotInstaller\bin\Debug\MissionchiefBotInstaller.exe.config
+D:\Development\Applications\MissionchiefBotInstaller\bin\Debug\MissionchiefBotInstaller.exe
+D:\Development\Applications\MissionchiefBotInstaller\bin\Debug\MissionchiefBotInstaller.pdb
+D:\Development\Applications\MissionchiefBotInstaller\bin\Debug\Newtonsoft.Json.dll
+D:\Development\Applications\MissionchiefBotInstaller\bin\Debug\Newtonsoft.Json.xml
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\MissionchiefBotInstaller.csproj.AssemblyReference.cache
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\MainWindow.baml
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\MainWindow.g.cs
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\App.g.cs
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\MissionchiefBotInstaller_MarkupCompile.cache
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\MissionchiefBotInstaller.g.resources
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\MissionchiefBotInstaller.Properties.Resources.resources
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\MissionchiefBotInstaller.csproj.GenerateResource.cache
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\MissionchiefBotInstaller.csproj.CoreCompileInputs.cache
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\Missionc.E4375F03.Up2Date
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\MissionchiefBotInstaller.exe
+D:\Development\Applications\MissionchiefBotInstaller\obj\Debug\MissionchiefBotInstaller.pdb

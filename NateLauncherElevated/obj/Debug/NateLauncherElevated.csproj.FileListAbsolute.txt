@@ -1,0 +1,10 @@
+D:\Development\Applications\NateLauncherElevated\bin\Debug\NateLauncherElevated.exe.config
+D:\Development\Applications\NateLauncherElevated\bin\Debug\NateLauncherElevated.exe
+D:\Development\Applications\NateLauncherElevated\bin\Debug\NateLauncherElevated.pdb
+D:\Development\Applications\NateLauncherElevated\obj\Debug\NateLauncherElevated.csproj.AssemblyReference.cache
+D:\Development\Applications\NateLauncherElevated\obj\Debug\NateLauncherElevated.csproj.CoreCompileInputs.cache
+D:\Development\Applications\NateLauncherElevated\obj\Debug\NateLauncherElevated.exe
+D:\Development\Applications\NateLauncherElevated\obj\Debug\NateLauncherElevated.pdb
+D:\Development\Applications\NateLauncherElevated\bin\Debug\Newtonsoft.Json.dll
+D:\Development\Applications\NateLauncherElevated\bin\Debug\Newtonsoft.Json.xml
+D:\Development\Applications\NateLauncherElevated\obj\Debug\NateLaun.65CF665A.Up2Date
