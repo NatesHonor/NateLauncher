@@ -19,21 +19,14 @@ namespace NateLauncher
             {
                 if (MessageBox.Show("Nate Launcher requires elevated permission to read this file. Would you like to continue?", "Permission Required", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-                    LaunchElevatedLauncher("InstallProgram", "missionchief", path);
+                    LaunchElevatedLauncher("missionchief", path);
                 }
                 return null;
             }
         }
 
-        public static async Task CheckAndRunInstaller(string installPath, string program)
+        public static async Task<bool> CheckAndRunInstaller(string installPath, string program)
         {
-            if (ReadFileWithAdminCheck(installPath) == null)
-            {
-                MessageBox.Show("Install Location Requires Elevated Permission", "Permission Required", MessageBoxButton.OK, MessageBoxImage.Warning);
-                LaunchElevatedLauncher("InstallProgram", "missionchief", installPath);
-                return;
-            }
-
             try
             {
                 if (!Directory.Exists(installPath))
@@ -44,31 +37,36 @@ namespace NateLauncher
                 string tempFilePath = Path.Combine(installPath, "temp.txt");
                 File.WriteAllText(tempFilePath, "test");
                 File.Delete(tempFilePath);
-                Debug.WriteLine("Administrator check passed.");
-                Debug.WriteLine("Running non-elevated installer.");
+
+                Debug.WriteLine("Successfully wrote to the directory. Using non-elevated installer.");
                 await Installer.InstallProgram(program, installPath);
                 Debug.WriteLine("Non-elevated installer finished.");
+                return true;
             }
             catch (UnauthorizedAccessException)
             {
-                Debug.WriteLine("Administrator check failed. Launching elevated installer.");
-                LaunchElevatedLauncher("InstallProgram", "missionchief", installPath);
+                Debug.WriteLine("Failed to write to the directory. Launching elevated installer.");
+                MessageBox.Show("The installation directory requires elevated permissions. The installer will now run with elevated permissions.", "Permission Required", MessageBoxButton.OK, MessageBoxImage.Warning);
+                LaunchElevatedLauncher(program, installPath);
+                return false;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error: {ex.Message}. Launching elevated installer.");
-                LaunchElevatedLauncher("InstallProgram", "missionchief", installPath);
+                MessageBox.Show($"An error occurred: {ex.Message}. The installer will now run with elevated permissions.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                LaunchElevatedLauncher(program, installPath);
+                return false;
             }
         }
 
-        public static void LaunchElevatedLauncher(string action, params string[] args)
+        public static void LaunchElevatedLauncher(string program, params string[] args)
         {
             var escapedArgs = string.Join(" ", args.Select(arg => $"\"{arg}\""));
 
             var processInfo = new ProcessStartInfo
             {
                 FileName = @"C:\Program Files (x86)\Nate Launcher\NateLauncherElevated.exe",
-                Arguments = $"{action} {escapedArgs}",
+                Arguments = $"{program} {escapedArgs}",
                 UseShellExecute = true,
                 Verb = "runas"
             };
@@ -76,7 +74,7 @@ namespace NateLauncher
             try
             {
                 Process.Start(processInfo);
-                Debug.WriteLine($"Successfully launched elevated installer with action: {action} and arguments: {escapedArgs}");
+                Debug.WriteLine($"Successfully launched elevated installer with program: {program} and arguments: {escapedArgs}");
             }
             catch (Exception ex)
             {

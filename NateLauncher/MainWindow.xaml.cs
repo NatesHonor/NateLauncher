@@ -70,24 +70,42 @@ namespace NateLauncher
                     try
                     {
                         dynamic config = JsonConvert.DeserializeObject(json);
-                        string tempFolderPath = Path.Combine((string)config.Missionchief, "missionchief", "temp");
-                        string installerPath = Path.Combine(tempFolderPath, "Windows-Installer.exe");
+                        string missionchiefPath = (string)config?.missionchief?.path;
+                        bool isInstalled = (bool)config?.missionchief?.installed;
+
+                        if (string.IsNullOrEmpty(missionchiefPath) || !isInstalled)
+                        {
+                            MessageBox.Show("Missionchief is not installed or path is missing in the configuration.");
+                            Log("Missionchief is not installed or path is missing in the configuration.");
+                            return;
+                        }
+
+                        string tempFolderPath = Path.Combine(missionchiefPath, "missionchief", "temp");
+                        string installerPath = Path.Combine(tempFolderPath, "MissionchiefBotInstaller.exe");
 
                         if (Directory.Exists(tempFolderPath) && File.Exists(installerPath))
                         {
                             Process.Start(installerPath);
                             return;
                         }
+                        else
+                        {
+                            MessageBox.Show("Installer file not found.");
+                            Log("Installer file not found.");
+                        }
                     }
                     catch (JsonReaderException ex)
                     {
                         MessageBox.Show($"JSON parsing error: {ex.Message}");
                         Log($"JSON parsing error: {ex.Message}");
-                        return;
                     }
                 }
+                else
+                {
+                    MessageBox.Show("Configuration file does not exist.");
+                    Log("Configuration file does not exist.");
+                }
 
-                MessageBox.Show("Installer not found.");
                 return;
             }
 
@@ -96,9 +114,17 @@ namespace NateLauncher
             if (dialog.ShowDialog() == true)
             {
                 string installPath = dialog.PathTextBox.Text;
-                await Utils.CheckAndRunInstaller(installPath, program);
-
-                InstallButton.Content = "Start";
+                bool installResult = await Utils.CheckAndRunInstaller(installPath, program);
+                if (!installResult)
+                {
+                    MessageBox.Show("Failed to install. Administrator permissions might be required.");
+                    Log("Failed to install due to insufficient permissions.");
+                }
+                else
+                {
+                    Log("Installation completed successfully.");
+                    InstallButton.Content = "Start";
+                }
             }
         }
 
@@ -123,8 +149,8 @@ namespace NateLauncher
                 try
                 {
                     dynamic config = JsonConvert.DeserializeObject(json);
-                    string missionchiefPath = Path.Combine((string)config.Missionchief, "missionchief");
-                    if (config.Missionchief != null && Directory.Exists(missionchiefPath))
+                    bool isMissionchiefInstalled = config?.missionchief?.installed ?? false;
+                    if (isMissionchiefInstalled)
                     {
                         InstallButton.Content = "Start";
                     }

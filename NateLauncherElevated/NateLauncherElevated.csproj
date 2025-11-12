@@ -85,7 +85,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>"D:\Development\Applications\NateLauncher\packages\ILMerge.3.0.41\tools\net452\ILMerge.exe" /out:"D:\Development\Applications\NateLauncherElevated\bin\Debug\NateLauncherElevated.exe" "D:\Development\Applications\NateLauncherElevated\bin\Debug\NateLauncherElevated.exe" "D:\Development\Applications\NateLauncherElevated\bin\Debug\Newtonsoft.Json.dll"
+</PostBuildEvent>
   </PropertyGroup>
 </Project>
