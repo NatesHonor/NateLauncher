@@ -3,13 +3,10 @@ from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QFont, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
 
-
 def resource_path(relative_path):
     import sys
-    import os
     base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
     return os.path.join(base_path, relative_path)
-
 
 class TitleBar(QWidget):
     def __init__(self, parent):
@@ -68,13 +65,13 @@ class TitleBar(QWidget):
         """
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = True
-            self.offset = event.globalPos() - self.parent.frameGeometry().topLeft()
+            self.offset = event.globalPosition().toPoint() - self.parent.frameGeometry().topLeft()
 
     def mouseMoveEvent(self, event):
-        if self.dragging:
-            self.parent.move(event.globalPos() - self.offset)
+        if self.dragging and event.buttons() & Qt.MouseButton.LeftButton:
+            self.parent.move(event.globalPosition().toPoint() - self.offset)
 
     def mouseReleaseEvent(self, event):
         self.dragging = False

@@ -1,37 +1,30 @@
+import sys
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, Qt
-from PyQt6.QtGui import QFont, QIcon
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QTextEdit, QFrame, QStatusBar, QStackedWidget
 )
 from widgets.glass_frame import GlassFrame
 from widgets.title_bar import TitleBar
 from widgets.action_button import ActionButton
-from windows.sidebar_window import Sidebar
-from handlers.profile_handler import ProfileHandler
-from handlers.logging_handler import generate_log_file
-from start_bot import MainWindow
-from handlers.console_handler import set_console_instance, send_messages
-from stop_bot import stop_bot
+from windows.sidebar import Sidebar
+from windows.settings import ProfileHandler
+from handlers.logging import generate_log_file
+from handlers.console import set_console_instance
+from utils.start import update_start_button_state, run_start_logic
 
 class MissionChiefBotApp(QMainWindow):
-    generate_log_file()
-
     def __init__(self):
         super().__init__()
-        self.current_view = "home"
+        generate_log_file()
         self.is_running = False
-        self.process = None
+        self.drag_offset = None
         self.setWindowTitle("MissionChief Bot")
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
 
         screen = self.screen().availableGeometry()
-        self.setGeometry(
-            screen.width() // 4,
-            screen.height() // 4,
-            screen.width() // 2,
-            screen.height() // 2
-        )
+        self.setGeometry(screen.width() // 4, screen.height() // 4, screen.width() // 2, screen.height() // 2)
 
         container = GlassFrame(self)
         container_layout = QVBoxLayout(container)
@@ -46,11 +39,7 @@ class MissionChiefBotApp(QMainWindow):
         content_layout.setContentsMargins(16, 16, 16, 16)
         content_layout.setSpacing(16)
 
-        self.sidebar = Sidebar(self)
-        content_layout.addWidget(self.sidebar)
-
         self.console_panel = QFrame()
-        self.console_panel.setObjectName("main_panel")
         self.console_panel.setStyleSheet("background-color: #101010; border-radius: 14px;")
         main_layout = QVBoxLayout(self.console_panel)
         main_layout.setContentsMargins(16, 16, 16, 16)
@@ -71,7 +60,7 @@ class MissionChiefBotApp(QMainWindow):
                 border-radius: 10px;
                 padding: 8px;
                 font-family: Consolas, Courier New, monospace;
-                font-size: 11pt;
+                font-size: 8pt;
             }
         """)
         main_layout.addWidget(self.console, 1)
@@ -103,6 +92,9 @@ class MissionChiefBotApp(QMainWindow):
         self.stack = QStackedWidget()
         self.stack.addWidget(self.console_panel)
         self.stack.addWidget(self.profile_handler)
+
+        self.sidebar = Sidebar(self, self.stack)
+        content_layout.addWidget(self.sidebar)
         content_layout.addWidget(self.stack, 1)
 
         container_layout.addWidget(content, 1)
@@ -113,74 +105,38 @@ class MissionChiefBotApp(QMainWindow):
         root_layout.addWidget(container)
         self.setCentralWidget(root)
 
-        self.main_window_instance = MainWindow()
-        self.main_window_instance.worker.started.connect(self._store_process)
+    def toggle_start_stop(self):
+        self.is_running = not self.is_running
+        update_start_button_state(self.start_button, self.is_running)
 
-    def _store_process(self, proc):
-        self.process = proc
+        if self.is_running:
+            run_start_logic(self.status_bar)
 
     def animate_button(self, btn):
         anim = QPropertyAnimation(btn, b"geometry", self)
         r = btn.geometry()
         anim.setDuration(120)
         anim.setStartValue(QRect(r.x(), r.y(), r.width(), r.height()))
-        anim.setEndValue(QRect(r.x(), r.y()+2, r.width(), r.height()))
+        anim.setEndValue(QRect(r.x(), r.y() + 2, r.width(), r.height()))
         anim.setEasingCurve(QEasingCurve.Type.OutQuad)
         anim.finished.connect(lambda: btn.setGeometry(r))
         anim.start()
 
-    def show_settings(self):
-        self.sidebar.settings_btn.setText("Home")
-        self.sidebar.settings_btn.setIcon(QIcon("icons/home.png"))
-        self.stack.setCurrentIndex(1)
-        self.current_view = "settings"
-        self.sidebar.settings_btn.clicked.disconnect()
-        self.sidebar.settings_btn.clicked.connect(self.show_home)
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_offset = event.position().toPoint()
 
-    def show_home(self):
-        self.sidebar.settings_btn.setText("Settings")
-        self.sidebar.settings_btn.setIcon(QIcon("icons/settings.png"))
-        self.stack.setCurrentIndex(0)
-        self.current_view = "home"
-        self.sidebar.settings_btn.clicked.disconnect()
-        self.sidebar.settings_btn.clicked.connect(self.show_settings)
+    def mouseMoveEvent(self, event):
+        if self.drag_offset is not None and event.buttons() & Qt.MouseButton.LeftButton:
+            gp = event.globalPosition().toPoint()
+            self.move(gp - self.drag_offset)
 
-    def toggle_start_stop(self):
-        self.is_running = not self.is_running
-        if self.is_running:
-            self.start_button.setText("Stop Bot")
-            self.start_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #E05454;
-                    color: #FFFFFF;
-                    border: none;
-                    border-radius: 12px;
-                    font-weight: 600;
-                    padding: 10px 16px;
-                }
-                QPushButton:hover { background-color: #EB6666; }
-                QPushButton:pressed { background-color: #C94949; }
-            """)
-            self.status_bar.showMessage("Bot Running")
-            self.process = self.main_window_instance.start_bot()
-        else:
-            self.start_button.setText("Start Bot")
-            self.start_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #2E7CF6;
-                    color: #FFFFFF;
-                    border: none;
-                    border-radius: 12px;
-                    font-weight: 600;
-                    padding: 10px 16px;
-                }
-                QPushButton:hover { background-color: #3B86F7; }
-                QPushButton:pressed { background-color: #266BE3; }
-            """)
-            self.status_bar.showMessage("Bot Stopped")
-            if self.process is not None:
-                self.process = stop_bot(self.process)
-            else:
-                send_messages("No bot process is currently running.")
-            send_messages("Stop command issued from UI.")
-        self.animate_button(self.start_button)
+    def mouseReleaseEvent(self, event):
+        self.drag_offset = None
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    app.setStyleSheet("QWidget { background-color: #101010; }")
+    window = MissionChiefBotApp()
+    window.show()
+    sys.exit(app.exec())
