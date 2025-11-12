@@ -2,7 +2,7 @@ import os
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QFont, QIcon, QPixmap
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel
-from profile_handler import ProfileHandler
+from handlers.profile_handler import ProfileHandler
 
 def resource_path(relative_path):
     import sys

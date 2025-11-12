@@ -8,10 +8,10 @@ from widgets.glass_frame import GlassFrame
 from widgets.title_bar import TitleBar
 from widgets.action_button import ActionButton
 from windows.sidebar_window import Sidebar
-from profile_handler import ProfileHandler
-from logging_handler import generate_log_file
+from handlers.profile_handler import ProfileHandler
+from handlers.logging_handler import generate_log_file
 from start_bot import MainWindow
-from console_handler import set_console_instance, send_messages
+from handlers.console_handler import set_console_instance, send_messages
 from stop_bot import stop_bot
 
 class MissionChiefBotApp(QMainWindow):

@@ -5,7 +5,7 @@ import zipfile
 
 from PyQt6.QtCore import QThread, pyqtSignal, QProcess
 
-from console_handler import send_messages
+from handlers.console_handler import send_messages
 
 class Worker(QThread):
     output = pyqtSignal(str)
@@ -24,7 +24,7 @@ class Worker(QThread):
                 f.write("")
             self.output.emit("launcher_settings.ini created, requesting venv preference")
         else:
-            self.start_bot_after_wait()
+            self.output.emit("Setup complete, ready to start bot")
 
     def _read_venv_name(self, file):
         for line in file:
@@ -84,7 +84,6 @@ class Worker(QThread):
         self.process.setArguments(command.split()[1:])
         self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self.process.readyReadStandardOutput.connect(self.handle_stdout)
-        self.process.readyReadStandardError.connect(self.handle_stderr)
         self.process.finished.connect(self.command_finished)
         self.process.start()
 
@@ -93,19 +92,17 @@ class Worker(QThread):
         if output:
             self.output.emit(output)
 
-    def handle_stderr(self):
-        error = bytes(self.process.readAllStandardError()).decode(errors="ignore")
-        if error:
-            self.output.emit(error)
-
     def command_finished(self, exit_code):
         if exit_code == 0 and not self.requirements_installed:
             self.requirements_installed = True
-            self.start_bot_after_wait()
 
-    def start_bot_after_wait(self):
-        with open("launcher_settings.ini", "r") as f:
-            venv_name = self._read_venv_name(f)
+class MainWindow:
+    def __init__(self):
+        self.worker = Worker()
+        self.worker.output.connect(send_messages)
+        self.process = None
+
+    def start_bot_process(self, venv_name=""):
         bot_main = os.path.join(os.getcwd(), "bot", "main.py")
         python_exe = os.path.join(venv_name, 'Scripts', 'python.exe') if os.name == 'nt' else os.path.join(venv_name, 'bin', 'python')
         command = python_exe if venv_name else "python"
@@ -116,22 +113,25 @@ class Worker(QThread):
         self.process.setArguments(args)
         self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self.process.readyReadStandardOutput.connect(self.handle_stdout)
-        self.process.readyReadStandardError.connect(self.handle_stderr)
+        self.process.finished.connect(self.handle_finished)
         self.process.start()
 
         pid = self.process.processId()
-        self.output.emit(f"Bot started with process ID {pid}")
-        self.started.emit(self.process)
+        send_messages(f"Bot started with process ID {pid}")
         return self.process
 
-class MainWindow:
-    def __init__(self):
-        self.worker = Worker()
-        self.worker.output.connect(send_messages)
+    def handle_stdout(self):
+        data = self.process.readAllStandardOutput().data().decode(errors="ignore")
+        if data:
+            send_messages(data)
+
+    def handle_finished(self):
+        send_messages("Bot process finished.")
+        self.process = None
 
     def start_bot(self):
         if self.worker.isRunning():
             send_messages("Bot launch already in progress.")
             return self.worker.process
         self.worker.start()
-        return self.worker.process
+        return self.start_bot_process()
