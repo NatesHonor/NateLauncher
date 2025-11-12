@@ -87,7 +87,7 @@ def run_start_logic(status_bar: QStatusBar):
                 f.write(f"version={DEFAULT_VERSION}\n")
                 f.write(f"venv={venv_name}\n")
             send_messages(f"venv set as {venv_name} and saved to settings")
-            status_bar.showMessage(f"venv set as {venv_name}")
+            status_bar.showMessage(f"venv set to {venv_name}")
 
     try:
         response = requests.get("https://api.natemarcellus.com/updates/missionchieflauncher", params={"current_version": version}, timeout=5)
