@@ -6,9 +6,8 @@ import requests
 from io import BytesIO
 from handlers.console import send_messages
 from PyQt6.QtWidgets import QStatusBar
-
+from utils import state
 from utils.runbot import run_bot
-
 
 def run_install(venv_name: str, status_bar: QStatusBar):
     send_messages(f"Starting install process for venv '{venv_name}'")
@@ -65,6 +64,7 @@ def run_install(venv_name: str, status_bar: QStatusBar):
                     stderr=subprocess.STDOUT,
                     text=True
                 )
+                state.add_process("pip_install", process)
                 for line in process.stdout:
                     send_messages(line.strip())
                 process.wait()
@@ -83,10 +83,8 @@ def run_install(venv_name: str, status_bar: QStatusBar):
             send_messages("No requirements.txt found in bot folder.")
             status_bar.showMessage("No requirements.txt found.")
 
-
     except Exception as e:
         send_messages(f"Install process failed: {e}")
         status_bar.showMessage("Install process failed")
-
 
     run_bot(venv_name, status_bar)

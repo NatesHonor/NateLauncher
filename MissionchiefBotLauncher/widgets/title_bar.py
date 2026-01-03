@@ -23,7 +23,7 @@ class TitleBar(QWidget):
         if os.path.exists(logo_path):
             self.logo.setPixmap(QPixmap(logo_path).scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
-        self.title = QLabel("MissionChief Bot")
+        self.title = QLabel("Mission Helper")
         self.title.setStyleSheet("color: #EAEAEA;")
         self.title.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
         layout.addWidget(self.logo)

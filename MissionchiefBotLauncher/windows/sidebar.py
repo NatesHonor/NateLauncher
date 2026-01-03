@@ -1,7 +1,12 @@
 import os
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QFont, QIcon, QPixmap
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+from PyQt6.QtWidgets import (
+    QFrame, QVBoxLayout, QHBoxLayout, QLabel,
+    QPushButton, QDialog
+)
+
+from utils.regions import list_regions, select_region
 
 def resource_path(relative_path):
     import sys
@@ -29,7 +34,11 @@ class Sidebar(QFrame):
         avatar.setFixedSize(36, 36)
         avatar_path = resource_path("icons/user_icon.png")
         if os.path.exists(avatar_path):
-            avatar.setPixmap(QPixmap(avatar_path).scaled(36, 36, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            avatar.setPixmap(QPixmap(avatar_path).scaled(
+                36, 36,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            ))
 
         name_label = QLabel("User")
         name_label.setStyleSheet("color: #EAEAEA;")
@@ -38,10 +47,13 @@ class Sidebar(QFrame):
         user_layout.addWidget(name_label, 1)
         layout.addWidget(user_block)
 
-        self.settings_btn = self._make_btn("Settings", resource_path("icons/settings.png"))
-        self.signout_btn = self._make_btn("Sign Out", resource_path("icons/signout.png"))
-        self.exit_btn = self._make_btn("Exit", resource_path("icons/close.png"))
+        self.region_btn = self._make_btn(self.get_region(), resource_path("icons/globe.png"))
+        self.region_btn.clicked.connect(self.change_region)
+        layout.addWidget(self.region_btn)
 
+        self.settings_btn = self._make_btn("Settings", resource_path("icons/settings.png"))
+        self.signout_btn = self._make_btn("Sign In", resource_path("icons/signout.png"))
+        self.exit_btn = self._make_btn("Exit", resource_path("icons/close.png"))
 
         self.settings_btn.clicked.connect(self.show_settings)
         self.exit_btn.clicked.connect(parent.close)
@@ -50,6 +62,30 @@ class Sidebar(QFrame):
         layout.addWidget(self.signout_btn)
         layout.addStretch(1)
         layout.addWidget(self.exit_btn)
+
+    def get_region(self):
+        import configparser
+        config = configparser.ConfigParser()
+        config.read("launcher_settings.ini")
+        return config.get("Launcher", "region", fallback="Select Region")
+
+    def change_region(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Select Region")
+        dialog.setModal(True)
+        layout = QVBoxLayout(dialog)
+
+        for region in list_regions():
+            btn = QPushButton(region)
+            btn.clicked.connect(lambda _, r=region: self._select_region(dialog, r))
+            layout.addWidget(btn)
+
+        dialog.exec()
+
+    def _select_region(self, dialog, region):
+        select_region(region)
+        self.region_btn.setText(region)
+        dialog.accept()
 
     def _make_btn(self, text, icon):
         btn = QPushButton(text)

@@ -4,6 +4,7 @@ import subprocess
 from handlers.console import send_messages
 from utils.install import run_install
 from utils.runbot import run_bot
+from utils import state
 from PyQt6.QtWidgets import QStatusBar
 
 def run_integrity_check(venv_name: str, status_bar: QStatusBar):
@@ -75,6 +76,7 @@ def run_integrity_check(venv_name: str, status_bar: QStatusBar):
                 stderr=subprocess.STDOUT,
                 text=True
             )
+            state.add_process("pip_install_integrity", process)
             for line in process.stdout:
                 send_messages(line.strip())
             process.wait()
