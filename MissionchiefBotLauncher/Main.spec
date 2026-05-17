@@ -5,7 +5,7 @@ a = Analysis(
     ['Main.py'],
     pathex=[],
     binaries=[],
-    datas=[('handlers', 'handlers'), ('windows', 'windows'), ('utils', 'utils'), ('icons', 'icons'), ('widgets', 'widgets'), ('launcher_settings.ini', '.')],
+    datas=[('icons', 'icons')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
